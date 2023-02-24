@@ -16,7 +16,7 @@ contract("MyVotingInstance", accounts => {
     let MyVotingInstance;
 
 
-    describe.skip("Testing the add Voter function", () => {
+    describe("Testing the add Voter function", () => {
         
         beforeEach(async function() {
             MyVotingInstance = await Voting.new({from: _owner});
@@ -64,7 +64,7 @@ contract("MyVotingInstance", accounts => {
 
     });
 
-    describe.skip("Testing the add Proposal function", () => { 
+    describe("Testing the add Proposal function", () => { 
 
         beforeEach(async function() {
             MyVotingInstance = await Voting.new({from: _owner});
@@ -115,7 +115,7 @@ contract("MyVotingInstance", accounts => {
 
     });
 
-    describe.skip("Testing the Voting function", () => { 
+    describe("Testing the Voting function", () => { 
 
         beforeEach(async function() {
             MyVotingInstance = await Voting.new({from: _owner});
@@ -167,7 +167,7 @@ contract("MyVotingInstance", accounts => {
    
     });
 
-    describe.skip("Testing the tallyVotes function", () => { 
+    describe("Testing the tallyVotes function", () => { 
 
         beforeEach(async function() {
             MyVotingInstance = await Voting.new({from: _owner});
@@ -200,7 +200,7 @@ contract("MyVotingInstance", accounts => {
             expect(await MyVotingInstance.winningProposalID.call()).to.be.bignumber.equal(new BN(1))
         });
 
-        it("Only the Owner should be to count votes", async() => {
+        it("Only the Owner should be able to count votes", async() => {
             await expectRevert(MyVotingInstance.tallyVotes({from: _voter}),"Ownable: caller is not the owner");
             await expectRevert(MyVotingInstance.tallyVotes({from: _normalPeople}),"Ownable: caller is not the owner");
         });
@@ -213,7 +213,7 @@ contract("MyVotingInstance", accounts => {
 
     });
 
-    describe.skip("Testing the Workflow logic a bit more for each state of the Voting session", () => { 
+    describe("Testing the Workflow logic a bit more for each state of the Voting session", () => { 
 
         beforeEach(async function() {
             MyVotingInstance = await Voting.new({from: _owner});
@@ -276,7 +276,7 @@ contract("MyVotingInstance", accounts => {
     });
 
 
-    describe.skip("Testing the function startProposalsRegistering", () => { 
+    describe("Testing the function startProposalsRegistering", () => { 
 
         beforeEach(async function() {
             MyVotingInstance = await Voting.new({from: _owner});
@@ -301,7 +301,7 @@ contract("MyVotingInstance", accounts => {
             expect(storedData_2).to.be.bignumber.equal(new BN(1));
         });
 
-        it("Only the Owner should be to count votes", async() => {
+        it("Only the Owner should be able to start the Registration of Proposals", async() => {
             await expectRevert(MyVotingInstance.startProposalsRegistering({from: _voter}),"Ownable: caller is not the owner");
             await expectRevert(MyVotingInstance.startProposalsRegistering({from: _normalPeople}),"Ownable: caller is not the owner");
         });
@@ -315,7 +315,7 @@ contract("MyVotingInstance", accounts => {
     });
 
     
-    describe.skip("Testing the function endProposalsRegistering", () => { 
+    describe("Testing the function endProposalsRegistering", () => { 
 
         beforeEach(async function() {
             MyVotingInstance = await Voting.new({from: _owner});
@@ -340,7 +340,7 @@ contract("MyVotingInstance", accounts => {
             expect(storedData_2).to.be.bignumber.equal(new BN(2));
         });
 
-        it("Only the Owner should be to count votes", async() => {
+        it("Only the Owner should be able to end the registration of Proposals", async() => {
             await expectRevert(MyVotingInstance.endProposalsRegistering({from: _voter}),"Ownable: caller is not the owner");
             await expectRevert(MyVotingInstance.endProposalsRegistering({from: _normalPeople}),"Ownable: caller is not the owner");
         });
@@ -353,7 +353,7 @@ contract("MyVotingInstance", accounts => {
     });
 
             
-    describe.skip("Testing the function startVotingSession", () => { 
+    describe("Testing the function startVotingSession", () => { 
 
         beforeEach(async function() {
             MyVotingInstance = await Voting.new({from: _owner});
@@ -379,7 +379,7 @@ contract("MyVotingInstance", accounts => {
             expect(storedData_2).to.be.bignumber.equal(new BN(3));
         });
 
-        it("Only the Owner should be to count votes", async() => {
+        it("Only the Owner should be able to start the Voting Session", async() => {
             await expectRevert(MyVotingInstance.startVotingSession({from: _voter}),"Ownable: caller is not the owner");
             await expectRevert(MyVotingInstance.startVotingSession({from: _normalPeople}),"Ownable: caller is not the owner");
         });
@@ -394,7 +394,7 @@ contract("MyVotingInstance", accounts => {
     });
 
 
-    describe.skip("Testing the function endVotingSession", () => { 
+    describe("Testing the function endVotingSession", () => { 
 
         beforeEach(async function() {
             MyVotingInstance = await Voting.new({from: _owner});
@@ -420,7 +420,7 @@ contract("MyVotingInstance", accounts => {
             expect(storedData_2).to.be.bignumber.equal(new BN(4));
         });
 
-        it("Only the Owner should be to count votes", async() => {
+        it("Only the Owner should be to able to end the Voting Session", async() => {
             await expectRevert(MyVotingInstance.endVotingSession({from: _voter}),"Ownable: caller is not the owner");
             await expectRevert(MyVotingInstance.endVotingSession({from: _normalPeople}),"Ownable: caller is not the owner");
         });
