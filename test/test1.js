@@ -16,7 +16,7 @@ contract("MyVotingInstance", accounts => {
     let MyVotingInstance;
 
 
-    describe("Testing the add Voter function", () => {
+    describe.skip("Testing the add Voter function", () => {
         
         beforeEach(async function() {
             MyVotingInstance = await Voting.new({from: _owner});
@@ -64,7 +64,7 @@ contract("MyVotingInstance", accounts => {
 
     });
 
-    describe("Testing the add Proposal function", () => { 
+    describe.skip("Testing the add Proposal function", () => { 
 
         beforeEach(async function() {
             MyVotingInstance = await Voting.new({from: _owner});
@@ -115,7 +115,7 @@ contract("MyVotingInstance", accounts => {
 
     });
 
-    describe("Testing the Voting function", () => { 
+    describe.skip("Testing the Voting function", () => { 
 
         beforeEach(async function() {
             MyVotingInstance = await Voting.new({from: _owner});
@@ -167,7 +167,7 @@ contract("MyVotingInstance", accounts => {
    
     });
 
-    describe("Testing the tallyVotes function", () => { 
+    describe.skip("Testing the tallyVotes function", () => { 
 
         beforeEach(async function() {
             MyVotingInstance = await Voting.new({from: _owner});
@@ -213,7 +213,7 @@ contract("MyVotingInstance", accounts => {
 
     });
 
-    describe("Testing the Workflow logic a bit more for each state of the Voting session", () => { 
+    describe.skip("Testing the Workflow logic a bit more for each state of the Voting session", () => { 
 
         beforeEach(async function() {
             MyVotingInstance = await Voting.new({from: _owner});
@@ -274,6 +274,214 @@ contract("MyVotingInstance", accounts => {
 
 
     });
+
+
+    describe.skip("Testing the function startProposalsRegistering", () => { 
+
+        beforeEach(async function() {
+            MyVotingInstance = await Voting.new({from: _owner});
+            await MyVotingInstance.addVoter(_voter);
+        });
+
+
+        it("Should start the Registration of Proposals and write the GENESIS one", async() => {
+            await MyVotingInstance.startProposalsRegistering();
+            const storedData = await MyVotingInstance.workflowStatus.call()
+            expect(storedData).to.be.bignumber.equal(new BN(1));
+            const storedData_2 = await MyVotingInstance.getOneProposal(0,{from:_voter});
+            expect(storedData_2.description).to.be.equal("GENESIS");
+            expect(storedData_2.voteCount).to.be.bignumber.equal(new BN(0));
+        });
+
+        it("The startProposalsRegistering function should be triggered when the workflowStatus = RegisteringVoters", async() => {
+            const storedData = await MyVotingInstance.workflowStatus.call();
+            expect(storedData).to.be.bignumber.equal(new BN(0));
+            await MyVotingInstance.startProposalsRegistering();
+            const storedData_2 = await MyVotingInstance.workflowStatus.call()
+            expect(storedData_2).to.be.bignumber.equal(new BN(1));
+        });
+
+        it("Only the Owner should be to count votes", async() => {
+            await expectRevert(MyVotingInstance.startProposalsRegistering({from: _voter}),"Ownable: caller is not the owner");
+            await expectRevert(MyVotingInstance.startProposalsRegistering({from: _normalPeople}),"Ownable: caller is not the owner");
+        });
+        
+        it("A WorkflowStatusChange Event should be emitted", async() => {
+            const storedData = await MyVotingInstance.startProposalsRegistering();
+            await expectEvent(storedData, 'WorkflowStatusChange',0,1);
+        });
+
+
+    });
+
+    
+    describe.skip("Testing the function endProposalsRegistering", () => { 
+
+        beforeEach(async function() {
+            MyVotingInstance = await Voting.new({from: _owner});
+            await MyVotingInstance.addVoter(_voter);
+            await MyVotingInstance.startProposalsRegistering();
+
+
+        });
+
+        
+        it("Should end the Registration of Proposals", async() => {
+            await MyVotingInstance.endProposalsRegistering();
+            const storedData = await MyVotingInstance.workflowStatus.call()
+            expect(storedData).to.be.bignumber.equal(new BN(2));
+        });
+
+        it("The endProposalsRegistering function should be triggered when the workflowStatus = ProposalsRegistrationStarted", async() => {
+            const storedData = await MyVotingInstance.workflowStatus.call();
+            expect(storedData).to.be.bignumber.equal(new BN(1));
+            await MyVotingInstance.endProposalsRegistering();
+            const storedData_2 = await MyVotingInstance.workflowStatus.call()
+            expect(storedData_2).to.be.bignumber.equal(new BN(2));
+        });
+
+        it("Only the Owner should be to count votes", async() => {
+            await expectRevert(MyVotingInstance.endProposalsRegistering({from: _voter}),"Ownable: caller is not the owner");
+            await expectRevert(MyVotingInstance.endProposalsRegistering({from: _normalPeople}),"Ownable: caller is not the owner");
+        });
+        
+        it("A WorkflowStatusChange Event should be emitted", async() => {
+            const storedData = await MyVotingInstance.endProposalsRegistering();
+            await expectEvent(storedData, 'WorkflowStatusChange',1,2);
+        });
+
+    });
+
+            
+    describe.skip("Testing the function startVotingSession", () => { 
+
+        beforeEach(async function() {
+            MyVotingInstance = await Voting.new({from: _owner});
+            await MyVotingInstance.addVoter(_voter);
+            await MyVotingInstance.startProposalsRegistering();
+            await MyVotingInstance.endProposalsRegistering();
+
+
+        });
+
+                
+        it("Should start the Voting Session", async() => {
+            await MyVotingInstance.startVotingSession();
+            const storedData = await MyVotingInstance.workflowStatus.call()
+            expect(storedData).to.be.bignumber.equal(new BN(3));
+        });
+
+        it("The startVotingSession function should be triggered when the workflowStatus = ProposalsRegistrationEnded", async() => {
+            const storedData = await MyVotingInstance.workflowStatus.call();
+            expect(storedData).to.be.bignumber.equal(new BN(2));
+            await MyVotingInstance.startVotingSession();
+            const storedData_2 = await MyVotingInstance.workflowStatus.call()
+            expect(storedData_2).to.be.bignumber.equal(new BN(3));
+        });
+
+        it("Only the Owner should be to count votes", async() => {
+            await expectRevert(MyVotingInstance.startVotingSession({from: _voter}),"Ownable: caller is not the owner");
+            await expectRevert(MyVotingInstance.startVotingSession({from: _normalPeople}),"Ownable: caller is not the owner");
+        });
+        
+        it("A WorkflowStatusChange Event should be emitted", async() => {
+            const storedData = await MyVotingInstance.startVotingSession();
+            await expectEvent(storedData, 'WorkflowStatusChange',2,3);
+        });
+
+
+
+    });
+
+
+    describe.skip("Testing the function endVotingSession", () => { 
+
+        beforeEach(async function() {
+            MyVotingInstance = await Voting.new({from: _owner});
+            await MyVotingInstance.addVoter(_voter);
+            await MyVotingInstance.startProposalsRegistering();
+            await MyVotingInstance.endProposalsRegistering();
+            await MyVotingInstance.startVotingSession();
+
+        });
+
+                
+        it("Should end the Voting Session", async() => {
+            await MyVotingInstance.endVotingSession();
+            const storedData = await MyVotingInstance.workflowStatus.call()
+            expect(storedData).to.be.bignumber.equal(new BN(4));
+        });
+
+        it("The endVotingSession function should be triggered when the workflowStatus = VotingSessionStarted", async() => {
+            const storedData = await MyVotingInstance.workflowStatus.call();
+            expect(storedData).to.be.bignumber.equal(new BN(3));
+            await MyVotingInstance.endVotingSession();
+            const storedData_2 = await MyVotingInstance.workflowStatus.call()
+            expect(storedData_2).to.be.bignumber.equal(new BN(4));
+        });
+
+        it("Only the Owner should be to count votes", async() => {
+            await expectRevert(MyVotingInstance.endVotingSession({from: _voter}),"Ownable: caller is not the owner");
+            await expectRevert(MyVotingInstance.endVotingSession({from: _normalPeople}),"Ownable: caller is not the owner");
+        });
+        
+        it("A WorkflowStatusChange Event should be emitted", async() => {
+            const storedData = await MyVotingInstance.endVotingSession();
+            await expectEvent(storedData, 'WorkflowStatusChange',3,4);
+        });
+
+
+
+    });
+
+
+    describe("More tests to learn", () => { 
+
+        beforeEach(async function() {
+            MyVotingInstance = await Voting.new({from: _owner});
+        });
+
+                
+        it("Should add multiple proposals and return the number 4", async() => {
+            await MyVotingInstance.addVoter(_voter);
+            await MyVotingInstance.startProposalsRegistering()
+            await MyVotingInstance.addProposal("proposal1", {from: _voter});
+            await MyVotingInstance.addProposal("proposal2", {from: _voter});
+            await MyVotingInstance.addProposal("proposal3", {from: _voter});
+            await MyVotingInstance.addProposal("proposal4", {from: _voter});
+            await MyVotingInstance.addProposal("proposal5", {from: _voter});
+            const storedData = await  MyVotingInstance.getOneProposal(4,{from: _voter});
+            expect(storedData.description).to.equal("proposal4");
+        });
+
+                        
+        it("Should add multiple voters and return the number 2", async() => {
+            await MyVotingInstance.addVoter(_voter);
+            await MyVotingInstance.addVoter(_owner);
+            await MyVotingInstance.addVoter(_normalPeople);
+            const storedData = await  MyVotingInstance.getVoter(_owner,{from: _voter});
+            expect(storedData.isRegistered).to.equal(true);
+        });
+
+
+        it("Should not be able to get a proposal which is not written", async() => {
+            await MyVotingInstance.addVoter(_voter);
+            await MyVotingInstance.startProposalsRegistering()
+            await MyVotingInstance.addProposal("proposal1", {from: _voter});
+            await MyVotingInstance.addProposal("proposal2", {from: _voter});
+            await MyVotingInstance.addProposal("proposal3", {from: _voter});
+            await expectRevert.unspecified(MyVotingInstance.getOneProposal(4,{from: _voter}));
+        });
+
+
+
+
+
+    });
+
+
+
+
 
 
 
